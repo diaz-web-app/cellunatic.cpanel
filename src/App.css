@@ -1,0 +1,42 @@
+*{
+  margin:0;
+  box-sizing: border-box;
+}
+a{
+  text-decoration: none;
+  color:inherit;
+}
+.App{
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: 55px calc(100vh - 55px);
+}
+header{
+  background:blue;
+}
+header > div{
+  display:flex;
+  flex-flow: row nowrap;
+  justify-content: space-between;
+  align-items: center;
+}
+main{
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: space-around;
+}
+main > nav{
+  height:calc(100vh - 55px);
+  position:fixed;
+  top:55px;
+  left: 0;
+  bottom: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+main > nav,main > section{
+  transition:all .4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+main > section{
+  background-color: red;
+}
