@@ -1,17 +1,18 @@
-import { ChangeEvent, FormEvent, useContext } from "react"
+import { ChangeEvent, FormEvent, useContext, useEffect, useState } from "react"
 import { Link, useHistory } from "react-router-dom"
-import GlobalAppContext from "../../context/app/app_state"
-import { TCategoria, TTipoPost } from "../../interfaces/interfaces"
+import GlobalAppContext from "../context/app/app_state"
+import { TCategoria, TGetMediaFiles, TMediaFile, TTipoPost } from "../interfaces/interfaces"
 
 type CreateParams={
     post:any
     post_metas:any[]
-    post_categorias:any[]
+    post_categorias:any[],
+    covers:TMediaFile[]
 }
-const http_create_post=async({post,post_metas,post_categorias}:CreateParams)=>{
+const http_create_post=async({post,post_metas,post_categorias,covers}:CreateParams)=>{
     const request = await fetch(`${process.env.REACT_APP_API}/posts`,{
         method:'post',
-        body:JSON.stringify({post,post_metas,post_categorias}),
+        body:JSON.stringify({post,post_metas,post_categorias,covers}),
         headers:{
             "content-type":"application/json"
         }
@@ -19,10 +20,12 @@ const http_create_post=async({post,post_metas,post_categorias}:CreateParams)=>{
     if(request.status === 500) return false
     return true
 }
-const upload_cover=async(e:any)=>{
+const upload_cover=async(files:any[])=>{
     const form = new FormData()
     
-    form.append('cover',e)
+    for(let file of files){
+        form.append('cover',file)
+    }
     const request = await fetch(`${process.env.REACT_APP_API}/covers`,{
         method:'post',
         body:form
@@ -33,6 +36,22 @@ const upload_cover=async(e:any)=>{
     }
     return false
     
+}
+type TDeleteProps={
+    path:string
+}
+const delete_cover = async({path}:TDeleteProps)=>{
+    const request = await fetch(`${process.env.REACT_APP_API}/covers`,{
+        method:'delete',
+        body:JSON.stringify({path}),
+        headers:{
+            "content-type":"application/json"
+        }
+    })
+    if(request.status === 200){
+        return await request.json()
+    }
+    return  false
 }
 const addMeta=(e:FormEvent)=>{
     e.preventDefault()
@@ -136,29 +155,38 @@ const prepare_post=(e:any)=>{
 const NewPost = () => {
     const {goBack} = useHistory()
     const {app} = useContext(GlobalAppContext)
+    const [covers,setCovers] = useState<TGetMediaFiles[]>([])
+
     const create_post_handler=async(e:any)=>{
         e.preventDefault()
         
         const {post,post_metas,post_categorias}:any = prepare_post(e)
         if(!post || !post_metas || !post_categorias) return
-        console.log(post)
-        const res = await http_create_post({post,post_metas,post_categorias})
+        
+        const res = await http_create_post({post,post_metas,post_categorias,covers})
         if(!res) return alert('error')
         alert('ok')
         goBack()
     }
     const upload_cover_handler=async(e:ChangeEvent<HTMLInputElement>)=>{
-        
         if(e.target.files && e.target.parentElement){
-            const img = await upload_cover(e.target.files[0])
-            const cover:HTMLInputElement | null = e.target.parentElement.querySelector('input[name=cover]')
-            if(!img) return alert('hubo un error')
-            if(cover){
-                
-                return cover.value = img.url
+            const {files}:any = e.target
+            const imgs = await upload_cover(files)
+            
+            if(!imgs) return alert('hubo un error')
+            for(let img of covers){
+                imgs.push(img)
             }
+            setCovers(imgs.reverse())
         }
     }
+    const delete_cover_handler=async(path:string)=>{
+        const deleted = await delete_cover({path})
+        if(deleted){
+            return setCovers(covers.filter(cover=>cover.path !== deleted.path))
+        }
+    }
+    
     return (
         <section>
             <form onSubmit={create_post_handler} >
@@ -182,10 +210,11 @@ const NewPost = () => {
                             }
                         </select>
                     </div>
-                    <div>
-                        <label>Cover</label>
-                        <input onChange={upload_cover_handler} type="file" name="file" />
-                        <input type="hidden" name="cover" readOnly/>
+                    <div className="box_img" >
+                        <label>Covers</label>
+                        <div className="input_covers">
+                            <input onChange={upload_cover_handler} type="file" multiple />
+                        </div>
                     </div>
 
                     <div>
@@ -207,9 +236,15 @@ const NewPost = () => {
                                           
                     </div>
                 </div>
-                {/** titulo y Tipo de post */}
+                {/** covers post */}
                 <div className="cover_preview" >
-                    <img src="/logo512x512.png" alt="cover" />
+                    <ul style={{display:'flex',flexFlow:'row wrap'}} >
+                    {
+                        covers.length > 0?(
+                            covers.map(cover=>(<li style={{position:'relative',listStyle:'none',margin:'5px',width:'100px',height:'100px'}} key={cover._id} ><span onClick={()=>delete_cover_handler(cover.path)}  style={{position:'absolute',right:0,top:0,fontWeight:'bold',cursor:'pointer'}} >X</span><img style={{objectFit:'contain',width:'100%',height:'100%'}} src={process.env.REACT_APP_API+cover.url} alt={cover.filename} /></li>))
+                        ):null
+                    }
+                    </ul>
                 </div>
                 
                 <div>

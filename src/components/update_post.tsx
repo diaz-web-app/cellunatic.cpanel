@@ -1,17 +1,20 @@
-import { ChangeEvent, FormEvent, useContext } from "react"
+import { ChangeEvent, FormEvent, useCallback, useContext, useEffect, useState } from "react"
+import { useParams } from "react-router"
+import { get_post } from "../api/get_posts_controllers"
 import GlobalAppContext from "../context/app/app_state"
-import { TCategoria, TMeta, TTipoPost } from "../interfaces/interfaces"
+import { TCategoria, TGetMediaFiles, TGetPost, TMeta, TTipoPost } from "../interfaces/interfaces"
 
 type UpdateParams={
     post:any
     post_metas:any[]
     _id:string
+    covers:TGetMediaFiles[]
 }
 
-const http_update_post=async({post,post_metas,_id}:UpdateParams)=>{
+const http_update_post=async({post,post_metas,_id,covers}:UpdateParams)=>{
     const request = await fetch(`${process.env.REACT_APP_API}/posts`,{
         method:'put',
-        body:JSON.stringify({post,post_metas,_id}),
+        body:JSON.stringify({post,post_metas,_id,covers}),
         headers:{
             "content-type":"application/json"
         }
@@ -100,7 +103,7 @@ const delete_meta = (e:any)=>{
 }
 const prepare_post=(e:any)=>{
     e.preventDefault()
-    const {meta_desc,titulo,keywords,tipo,cover}:any = e.target 
+    const {meta_desc,titulo,keywords,cover}:any = e.target 
     
     //Seleccionamos los matas
     const post_metas:any[] = []
@@ -123,15 +126,16 @@ const prepare_post=(e:any)=>{
         titulo:titulo.value,
         contenido:meta_desc.value,
         keywords:keywords.value,
-        tipo:tipo.value,
         cover:cover?.value
     }
     return {post,post_metas}
 }
-const upload_cover=async(e:any)=>{
+const upload_cover=async(files:any[])=>{
     const form = new FormData()
     
-    form.append('cover',e)
+    for(let file of files){
+        form.append('cover',file)
+    }
     const request = await fetch(`${process.env.REACT_APP_API}/covers`,{
         method:'post',
         body:form
@@ -143,77 +147,106 @@ const upload_cover=async(e:any)=>{
     return false
     
 }
-export const UpdatePost = () => {
+type TDeleteProps={
+    path:string
+}
+const delete_cover = async({path}:TDeleteProps)=>{
+    const request = await fetch(`${process.env.REACT_APP_API}/covers`,{
+        method:'delete',
+        body:JSON.stringify({path}),
+        headers:{
+            "content-type":"application/json"
+        }
+    })
+    if(request.status === 200){
+        return await request.json()
+    }
+    return  false
+}
+
+const UpdatePost = () => {
     const {app} = useContext(GlobalAppContext)
+    const [data,setData] = useState<TGetPost>()
+    const [covers,setCovers] = useState<TGetMediaFiles[]>(data?data.covers:[])
+    const params = useParams<any>()
+
+    const set_post = useCallback( async()=>{
+       
+        const response = await get_post({url:params.id})
+        setData(response)
+        setCovers(response.covers)
+    
+    },[params.id])
+
     const update_post_handler=async(e:any)=>{
         e.preventDefault()
         
         const {post,post_metas}:any = prepare_post(e)
         if(!post || !post_metas) return
-        if(!app.post_state?.post) return alert('no hay id de post')
-        console.log(app.post_state.post)
-        const res = await http_update_post({_id:app.post_state?.post._id,post,post_metas})
+        if(!data || !data.post) return alert('no hay id de post')
+        
+        const res = await http_update_post({_id:data.post._id,post,post_metas,covers})
         if(!res) return alert('error')
         alert('ok')
     }
     const delete_post= async ()=>{
-        const deleted = await http_delete_post({_id:app.post_state?.post?app.post_state?.post._id:''})
+        if(!data || !data.post) return
+        const deleted = await http_delete_post({_id:data.post._id})
         if(deleted) return alert('post eliminado')
     }
     const upload_cover_handler=async(e:ChangeEvent<HTMLInputElement>)=>{
-        
         if(e.target.files && e.target.parentElement){
-            const img = await upload_cover(e.target.files[0])
-            const cover:HTMLInputElement | null = e.target.parentElement.querySelector('input[name=cover]')
-            if(!img) return alert('hubo un error')
-            if(cover){
-                
-                return cover.value = img.url
+            const {files}:any = e.target
+            const imgs = await upload_cover(files)
+            
+            if(!imgs) return alert('hubo un error')
+            for(let img of covers){
+                imgs.push(img)
             }
+            setCovers(imgs.reverse())        
         }
     }
+    const delete_cover_handler=async(path:string)=>{
+        const deleted = await delete_cover({path})
+        if(deleted){
+            return setCovers(covers.filter(cover=>cover.path !== deleted.path))
+        }
+    }
+    
+    useEffect(()=>{
+        set_post()
+    },[set_post])
     return (
-        <div>
+        <section>
             <form onSubmit={(e:any)=>update_post_handler(e)} >
                 {/** titulo y Tipo de post */}
                 <div>
                     {/** titulo requerido*/}
                     <div>
                         <label>Titulo</label>
-                        <input type="text" name="titulo" required placeholder="titulo" defaultValue={app.post_state?.post?.titulo}/>
+                        
+                        <input type="text" name="titulo" required placeholder="titulo" defaultValue={data?.post?.titulo}/>
                     </div>
-                    {/** tipo de post requerido*/}
-                    <div>
-                        <label>Tipo de post</label>
-                        <select name="tipo" required >
-                            <option defaultValue={app.post_state?.post?.tipo}>{app.post_state?.post?.tipo}</option>
-                            {
-                                app.tipos_state && app.tipos_state.length > 0?(
-                                    app.tipos_state.map((tipo:TTipoPost)=>(
-                                        <option key={tipo._id} defaultValue={tipo.url}>{tipo.titulo}</option>
-                                    ))
-                                ):null
-                            }
-                        </select>
-                    </div>
+                   
                 </div>
 
-                <div>
-                    <label>Cover</label>
-                    <input onChange={upload_cover_handler} type="file" name="file" />
-                    <input type="text" name="cover" defaultValue={app.post_state?.post?.cover} />
+                <div className="box_img" >
+                    <label>Covers</label>
+                    <div className="input_covers">
+                        <input onChange={upload_cover_handler} type="file" multiple />
+                    </div>
                 </div>
 
                 <div>
                     {/** Meta content */}
                     <div>
                         <label>Meta decription</label>
-                        <input type="text" name="meta_desc" required placeholder="meta description" defaultValue={app.post_state?.post?.contenido} />
+                        <input type="text" name="meta_desc" required placeholder="meta description" defaultValue={data?.post?.contenido} />
                     </div>
                     {/** Meta keywords*/}
                     <div>
                         <label>Meta keywords</label>
-                        <input type="text" name="keywords" required placeholder="cellunatic,forros,items..." defaultValue={app.post_state?.post?.keywords}/>
+                        <input type="text" name="keywords" required placeholder="cellunatic,forros,items..." defaultValue={data?.post?.keywords}/>
                     </div>
                 </div>
 
@@ -223,8 +256,8 @@ export const UpdatePost = () => {
                     <div id="inputs_metas" >
                         <label> Meta info del post <button onClick={addMeta}>+</button></label>
                         {
-                            app.post_state && app.post_state.metas.length > 0?(
-                                app.post_state?.metas.map((meta:TMeta)=>(
+                            data && data.metas.length > 0?(
+                                data?.metas.map((meta:TMeta)=>(
                                     <div key={meta._id}>
                                         <label>Clave</label><label>Contenido</label><span></span>
                                         <input name="clave" placeholder="Clave" defaultValue={meta.clave}/>
@@ -237,14 +270,23 @@ export const UpdatePost = () => {
                         }
                                           
                     </div>
+                    <div className="cover_preview" >
+                        <ul style={{display:'flex',flexFlow:'row wrap'}} >
+                        {
+                            covers.length > 0?(
+                                covers.map(cover=>(<li style={{position:'relative',listStyle:'none',margin:'5px',width:'100px',height:'100px'}} key={cover._id} ><span onClick={()=>delete_cover_handler(cover.path)}  style={{position:'absolute',right:0,top:0,fontWeight:'bold',cursor:'pointer'}} >X</span><img style={{objectFit:'contain',width:'100%',height:'100%'}} src={process.env.REACT_APP_API+cover.url} alt={cover.filename} /></li>))
+                            ):null
+                        }
+                        </ul>
+                    </div>
                     {/** categorias del post*/}
                     <div id="inputs_categorias" >
                         <label>Categorias</label>
                         <div>
                             {
-                                app.categorias_state && app.categorias_state.length > 0?(
+                                data && app.categorias_state && app.categorias_state.length > 0?(
                                     app.categorias_state.map((categoria:TCategoria)=>{
-                                        const checked = app.post_state?.post?.categoria.find(cat=>cat===categoria.url)
+                                        const checked = data.post?.categoria.find(cat=>cat===categoria.url)
                                         return (
                                         <span key={categoria._id} >
                                             <label htmlFor={categoria._id}>{categoria.titulo}</label>
@@ -286,7 +328,15 @@ export const UpdatePost = () => {
                         align-items:flex-start;
                         align-content:flex-start;
                     }
-                    
+                    form .cover_preview{
+                        width:90%;
+                        height:90%;
+                    }
+                    form .cover_preview img{
+                        width:100%;
+                        height:100%;
+                        object-fit:contain;
+                    }
                     #inputs_categorias span,#inputs_categorias span input{
                         margin:2px;
                     }
@@ -298,7 +348,8 @@ export const UpdatePost = () => {
                     `
                 }
             </style>
-        </div>
+        </section>
     )
 }
 
+export default UpdatePost

@@ -14,7 +14,7 @@ function appReducer(state:State,action:AppActions){
                 ...state,
                 posts_state:payload
             }
-        case 'set_post':
+        case 'get_post':
             return{
                 ...state,
                 post_state:payload

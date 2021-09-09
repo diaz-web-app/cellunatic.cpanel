@@ -9,7 +9,7 @@ import appReducer from './app_reducer'
 export const initialApp:State={
     paginas_state:null,
     posts_state:null,
-    post_state:{metas:[],post:null},
+    post_state:{metas:[],post:null,covers:[]},
     accesorios_state:null,
     menu_state:false,
     tipos_state:null,

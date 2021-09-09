@@ -22,6 +22,7 @@ export type TGetPosts= {
 export type TGetPost= {
     post:TPost | null
     metas:TMeta[]
+    covers:TGetMediaFiles[]
 }
 //****** post metas ******//
 export type TMeta={
@@ -50,6 +51,35 @@ export type TTipoPost={
     updatedAt: Date
 }
 export type TGetTiposPost = TTipoPost[] | []
+//*******Media types ********//
+
+export type TMediaFile={
+    fieldname: string
+    originalname: string
+    encoding: string
+    mimetype: string
+    destination: string
+    filename: string
+    path: string
+    size: number
+    url: string
+}
+
+export type TGetMediaFiles={
+    _id: string
+    fieldname: string
+    originalname: string
+    encoding: string
+    mimetype: string
+    destination: string
+    filename: string
+    path: string
+    size: number
+    url: string
+    id_post?: string
+    createdAt: Date
+    updatedAt: Date
+}
 
 //****** Estado de la app ******//
 export type State = {
@@ -66,7 +96,7 @@ export type State = {
 export type AppActions =
     | { type: 'swich_menu',payload:any}
     | { type: 'get_posts',payload:TGetPosts | null}
-    | { type: 'set_post',payload:TGetPost}
+    | { type: 'get_post',payload:TGetPost}
     | { type: 'get_paginas',payload:TGetPosts | null}
     | { type: 'get_accesorios',payload:TGetPosts | null}
     | { type: 'get_tipos',payload:TGetTiposPost | null}

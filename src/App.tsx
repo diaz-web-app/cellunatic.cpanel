@@ -5,11 +5,11 @@ import { BrowserRouter, Route, Switch } from 'react-router-dom';
 import Cpanel from './pages/cpanel';
 import Header from './components/Header';
 import Navigation from './components/Navigation';
-import NewPost from './pages/posts/new_post';
+import NewPost from './components/new_post';
 import Posts from './pages/posts';
 import Paginas from './pages/paginas';
 import Accesorios from './pages/accesorios';
-import ThePost from './pages/post';
+import UpdatePost from './components/update_post';
 
 const Home = ()=>{
   return <h1>Home</h1>
@@ -28,7 +28,7 @@ function App() {
           <Route path="/cpanel" component={Cpanel} />
           <Route path="/post" component={Posts} />
           <Route path="/new_post" component={NewPost} />
-          <Route path="/the_post" component={ThePost} />
+          <Route path="/update_post/:id" component={UpdatePost} />
           <Route path="/pagina" component={Paginas} />
           <Route path="/accesorio" component={Accesorios} />
         </Switch>
