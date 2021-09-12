@@ -197,45 +197,16 @@ const NewPost = () => {
                         <label>Titulo</label>
                         <input type="text" name="titulo" required placeholder="titulo"/>
                     </div>
-                    {/** tipo de post requerido*/}
+
                     <div>
-                        <label>Tipo de post</label>
-                        <select name="tipo" required>
-                            {
-                                app.tipos_state && app.tipos_state.length > 0?(
-                                    app.tipos_state.map((tipo:TTipoPost)=>(
-                                        <option key={tipo._id} value={tipo.url}>{tipo.titulo}</option>
-                                    ))
-                                ):null
-                            }
-                        </select>
-                    </div>
-                    <div className="box_img" >
                         <label>Covers</label>
                         <div className="input_covers">
                             <input onChange={upload_cover_handler} type="file" multiple />
                         </div>
                     </div>
-
-                    <div>
-                        {/** Meta content */}
-                        <div>
-                            <label>Meta decription</label>
-                            <input type="text" name="meta_desc" required placeholder="meta description" />
-                        </div>
-                        {/** Meta keywords*/}
-                        <div>
-                            <label>Meta keywords</label>
-                            <input type="text" name="keywords" required placeholder="cellunatic,forros,items..." />
-                        </div>
-                    </div>
                     
-                    {/** post metas se van anadiendo inputs virtualmente segun se necesiten*/}
-                    <div id="inputs_metas" >
-                        <label> Meta info del post <button onClick={addMeta}>+</button>  </label>
-                                          
-                    </div>
                 </div>
+
                 {/** covers post */}
                 <div className="cover_preview" >
                     <ul style={{display:'flex',flexFlow:'row wrap'}} >
@@ -245,6 +216,40 @@ const NewPost = () => {
                         ):null
                     }
                     </ul>
+                </div>
+
+                {/** tipo de post requerido*/}
+                <div>
+                    <label>Tipo de post</label>
+                    <select name="tipo" required>
+                        {
+                            app.tipos_state && app.tipos_state.length > 0?(
+                                app.tipos_state.map((tipo:TTipoPost)=>(
+                                    <option key={tipo._id} value={tipo.url}>{tipo.titulo}</option>
+                                ))
+                            ):null
+                        }
+                    </select>
+                </div>
+
+                <div>
+                    {/** Meta content */}
+                    <div>
+                        <label>Meta decription</label>
+                        <input type="text" name="meta_desc" required placeholder="meta description" />
+                    </div>
+                    {/** Meta keywords*/}
+                    <div>
+                        <label>Meta keywords</label>
+                        <input type="text" name="keywords" required placeholder="cellunatic,forros,items..." />
+                    </div>
+                </div>
+                <div>
+                    {/** post metas se van anadiendo inputs virtualmente segun se necesiten*/}
+                    <div id="inputs_metas" >
+                        <label> Meta info del post <button onClick={addMeta}>+</button>  </label>
+                                          
+                    </div>
                 </div>
                 
                 <div>
@@ -276,7 +281,7 @@ const NewPost = () => {
             <style>
                 {
                     `
-                    form {
+                    form > div{
                         display:grid;
                         grid-template-columns:1fr;
                         gap:20px;
@@ -285,11 +290,7 @@ const NewPost = () => {
                     input,select{
                         width:95%;
                         border-radius:6px;
-                        padding:2px 4px;
                         border:2px solid var(--secondary-color);
-                        background:var(--primary-color);
-                        color:white;
-                        padding:5px 10px;
                         margin:5px 0;
                     }
                     
@@ -300,7 +301,7 @@ const NewPost = () => {
                         align-content:flex-start;
                     }
                     form .cover_preview{
-                        width:90%;
+                        width:100%;
                         height:90%;
                     }
                     form .cover_preview img{
@@ -312,8 +313,11 @@ const NewPost = () => {
                         margin:2px;
                     }
                     @media(min-width:960px){
-                        form {
+                        form > div{
                             grid-template-columns:repeat(2,1fr);
+                        }
+                        form .cover_preview ul{
+                            grid-column:1 / span 2;
                         }
                     }
                     `

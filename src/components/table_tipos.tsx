@@ -18,7 +18,7 @@ export const TableTipos = ()=>{
         await set_types()
     }
     return(
-        <table style={{minWidth:'300px'}} >
+        <table className="table_small" style={{minWidth:'300px'}} >
             <thead>
                 <tr>
                     <td>titulo</td>

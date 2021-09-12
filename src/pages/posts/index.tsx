@@ -17,12 +17,15 @@ const Posts = () => {
     },[])
     return (
         <>
-            <section>
-                <h1>Listado de posts</h1>
-                <div><Link to="/new_post"><a href="/new_post" >Añadir nuevo</a></Link></div>
-                <TablePosts />
+            <section className="pages_posts">
+                <div className="header_page">
+                    <b>Listado de posts</b>
+                    <Link to="/new_post"><a href="/new_post" ><button>Añadir nuevo</button></a></Link>
+                </div>
+                <div className="box_white">
+                    <TablePosts />
+                </div>
             </section>
-
         </>
     )
 }

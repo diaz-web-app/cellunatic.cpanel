@@ -228,13 +228,22 @@ const UpdatePost = () => {
                         <input type="text" name="titulo" required placeholder="titulo" defaultValue={data?.post?.titulo}/>
                     </div>
                    
+                    <div>
+                        <label>Covers</label>
+                        <div className="input_covers">
+                            <input onChange={upload_cover_handler} type="file" multiple />
+                        </div>
+                    </div>
                 </div>
 
-                <div className="box_img" >
-                    <label>Covers</label>
-                    <div className="input_covers">
-                        <input onChange={upload_cover_handler} type="file" multiple />
-                    </div>
+                <div className="cover_preview" >
+                    <ul style={{display:'flex',flexFlow:'row wrap'}} >
+                    {
+                        covers.length > 0?(
+                            covers.map(cover=>(<li style={{position:'relative',listStyle:'none',margin:'5px',width:'100px',height:'100px'}} key={cover._id} ><span onClick={()=>delete_cover_handler(cover.path)}  style={{position:'absolute',right:0,top:0,fontWeight:'bold',cursor:'pointer'}} >X</span><img style={{objectFit:'contain',width:'100%',height:'100%'}} src={process.env.REACT_APP_API+cover.url} alt={cover.filename} /></li>))
+                        ):null
+                    }
+                    </ul>
                 </div>
 
                 <div>
@@ -270,15 +279,7 @@ const UpdatePost = () => {
                         }
                                           
                     </div>
-                    <div className="cover_preview" >
-                        <ul style={{display:'flex',flexFlow:'row wrap'}} >
-                        {
-                            covers.length > 0?(
-                                covers.map(cover=>(<li style={{position:'relative',listStyle:'none',margin:'5px',width:'100px',height:'100px'}} key={cover._id} ><span onClick={()=>delete_cover_handler(cover.path)}  style={{position:'absolute',right:0,top:0,fontWeight:'bold',cursor:'pointer'}} >X</span><img style={{objectFit:'contain',width:'100%',height:'100%'}} src={process.env.REACT_APP_API+cover.url} alt={cover.filename} /></li>))
-                            ):null
-                        }
-                        </ul>
-                    </div>
+                    
                     {/** categorias del post*/}
                     <div id="inputs_categorias" >
                         <label>Categorias</label>
@@ -314,11 +315,7 @@ const UpdatePost = () => {
                     input,select{
                         width:95%;
                         border-radius:6px;
-                        padding:2px 4px;
                         border:2px solid var(--secondary-color);
-                        background:var(--primary-color);
-                        color:white;
-                        padding:5px 10px;
                         margin:5px 0;
                     }
                     
@@ -329,7 +326,7 @@ const UpdatePost = () => {
                         align-content:flex-start;
                     }
                     form .cover_preview{
-                        width:90%;
+                        width:100%;
                         height:90%;
                     }
                     form .cover_preview img{
@@ -343,6 +340,9 @@ const UpdatePost = () => {
                     @media(min-width:960px){
                         form > div{
                             grid-template-columns:repeat(2,1fr);
+                        }
+                        form .cover_preview ul{
+                            grid-column:1 / span 2;
                         }
                     }
                     `

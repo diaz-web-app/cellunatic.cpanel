@@ -18,29 +18,32 @@ export const TableCategorias = ()=>{
         await set_categories()
     }
     return(
-        <table style={{minWidth:'300px'}} >
+        <table className="table_small" style={{minWidth:'300px'}} >
             <thead>
-                <tr>
-                    <td>titulo</td>
-                    <td>url</td>
-                    <td>opciones</td>
-                </tr>
+                    <tr>
+                        <td>titulo</td>
+                        <td>url</td>
+                        <td>opciones</td>
+                    </tr>
             </thead>
+            
             <tbody>
-            {
-                app.categorias_state && app.categorias_state.length > 0? (
-                    app.categorias_state.map((categoria:TCategoria,i:number)=>{
-                        return (
-                            <tr key={i}>
-                                <td>{categoria.titulo}</td>
-                                <td>{categoria.url}</td>
-                                <td><button onClick={()=>delete_handler(categoria._id)} >Eliminar</button></td>
-                            </tr>
-                        )}
-                    )
-                ):null
-            }
+                
+                    {
+                        app.categorias_state && app.categorias_state.length > 0? (
+                            app.categorias_state.map((categoria:TCategoria,i:number)=>{
+                                return (
+                                    <tr key={i}>
+                                        <td>{categoria.titulo}</td>
+                                        <td>{categoria.url}</td>
+                                        <td><button onClick={()=>delete_handler(categoria._id)} >Eliminar</button></td>
+                                    </tr>
+                                )}
+                            )
+                        ):null
+                    }
             </tbody>
+              
         </table>
     )
 }

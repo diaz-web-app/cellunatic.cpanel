@@ -8,8 +8,6 @@ const Navigation = () => {
     return (
             <>
                 <nav className="principal" >
-             
-                    <h3>CPanel</h3>
                     <li>
                         <Link to="/cpanel" ><a href="/cpanel" >Dashboard</a></Link>
                     </li>
@@ -29,14 +27,19 @@ const Navigation = () => {
                 <style>{
                     `
                     /*Nav */
+                    nav li{
+                        list-style:none;
+                    }
                         nav.principal{
-                            width:250px;
-                            left:${app.menu_state?'0':'-250px'};
+                            width:200px;
+                            left:${app.menu_state?'0':'-200px'};
                         }
-                        main > section{
-                            margin-left:${app.menu_state?'250px':'0'};
-                            width:100%;
-                        } 
+                        @media(min-width:960px){
+                            main > section{
+                                margin-left:${app.menu_state?'200px':'0'};
+                                width:100%;
+                            } 
+                        }
                     `
                 }
                 </style>

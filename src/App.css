@@ -2,6 +2,15 @@
   margin:0;
   box-sizing: border-box;
 }
+:root{
+  --theme-color:rgb(6, 54, 143);
+  --background-color:rgb(240, 240, 240);
+  --primary-color:rgb(39, 94, 197);
+  --secondary-color:rgb(226, 151, 10);
+  --shadow-color:rgb(221, 221, 221);
+  --radius-1:10px;
+  --radius-2:5px;
+}
 a{
   text-decoration: none;
   color:inherit;
@@ -10,9 +19,12 @@ a{
   display: grid;
   grid-template-columns: 1fr;
   grid-template-rows: 55px calc(100vh - 55px);
+  overflow-y: auto;
+  overflow-x:hidden;
+  background-color: var(--background-color);
 }
-header{
-  background:blue;
+header,nav{
+  background-color: var(--theme-color);
 }
 header > div{
   display:flex;
@@ -26,17 +38,75 @@ main{
   justify-content: space-around;
 }
 main > nav{
-  height:calc(100vh - 55px);
   position:fixed;
   top:55px;
   left: 0;
   bottom: 0;
+  padding:2px 1px 2px 5px;
+}
+main > nav,main > section{
+  height:calc(100vh - 55px);
+  transition:all .4s ease;
   overflow-y: auto;
   overflow-x: hidden;
 }
-main > nav,main > section{
-  transition:all .4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
 main > section{
-  background-color: red;
+  padding:0 10px;
+}
+.table_container{
+  max-height:calc(100vh - 200px);
+  overflow-y: auto;
+  width:100%;
+  min-width:100%;
+}
+.table_container::-webkit-scrollbar{
+  background-color: transparent;
+  width:10px;
+}
+.table_container::-webkit-scrollbar-thumb{
+  background-color: var(--theme-color);
+  border-radius: 10px;
+}
+table{
+  width:100%;
+  min-width: 100%;
+}
+table thead td{
+  font-weight: bolder;
+  text-transform: uppercase;
+}
+table tbody td{
+  border-bottom: 3px solid var(--shadow-color);
+  text-transform: capitalize;
+}
+table td:last-child{
+  width:100px;
+  text-align: right;
+}
+button{
+  text-transform: capitalize;
+  background-color: var(--theme-color);
+  color:white;
+  border-radius: var(--radius-2);
+  cursor:pointer;
+  padding: 5px 8px;
+}
+.danger{
+  background-color: var(--secondary-color);
+}
+input,select,option{
+  padding:3px 8px;
+}
+.pages_posts .header_page{
+  display:flex;
+  flex-flow: row wrap;
+  justify-content: space-between;
+  margin:10px 0;
+}
+.box_white{
+  padding:10px;
+  background-color: white;
+  border-radius:var(--radius-1);
+  box-shadow: 0px 0px 10px var(--shadow-color);
+  margin: 20px auto;
 }

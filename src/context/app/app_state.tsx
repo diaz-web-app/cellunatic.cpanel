@@ -1,6 +1,5 @@
 import {createContext, Dispatch, useEffect, useReducer} from 'react'
 import { get_categorias } from '../../api/get_categorias_controllers'
-import { get_posts } from '../../api/get_posts_controllers'
 import { get_post_metas } from '../../api/get_post_metas_controllers'
 import { get_tipos_post } from '../../api/get_tipos_post_controllers'
 import { AppActions, State } from '../../interfaces/interfaces'
@@ -21,15 +20,6 @@ const GlobalAppContext = createContext<{app:State;app_dispatch:Dispatch<AppActio
 
 export const AppProvider =({children}:any)=>{
     const [app,app_dispatch] = useReducer(appReducer,initialApp)
-    const init_menu= async()=>{
-        const response = await get_posts({})
-        app_dispatch(
-            {
-                type:'get_posts',
-                payload:response
-            }
-        )
-    }
 
     const prepare_cpanel=async()=>{
         const res_cats = await get_categorias({})
@@ -51,7 +41,6 @@ export const AppProvider =({children}:any)=>{
     
     useEffect(()=>{
         prepare_cpanel()
-        init_menu()
     },[])
   return <GlobalAppContext.Provider value={{
       app,app_dispatch

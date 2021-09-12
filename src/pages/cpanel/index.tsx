@@ -33,17 +33,19 @@ const Cpanel = () => {
             <section>
                 <h1>Este es el cpanel</h1>
                 <article className="tipos_categorias" >
-                    <div className="tipos">
-                        <h2>Tipos de post</h2>
-                        <div><button>Añadir nuevo</button></div>
-                        <NewPostType />
-                        <TableTipos/>
+                    <div className="tipos box_white"> 
+
+                        {<NewPostType titulo="Tipos de posts" btn_text="Nuevo" />}
+                        <div className="table_container">
+                            <TableTipos/>
+                        </div>
                     </div>
-                    <div className="cats">
-                        <h2>Categorias</h2>
-                        <div><button>Añadir nuevo</button></div>
-                        <NewCategoria />
-                        <TableCategorias/>
+                    <div className="cats box_white">
+                        
+                        {<NewCategoria titulo="Categorias" btn_text="Nuevo"/>}
+                        <div className="table_container">
+                            <TableCategorias/>
+                        </div>
                     </div>
                 </article>                
             </section>
