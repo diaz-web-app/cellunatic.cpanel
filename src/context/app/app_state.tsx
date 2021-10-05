@@ -1,5 +1,6 @@
 import {createContext, Dispatch, useEffect, useReducer} from 'react'
 import { get_categorias } from '../../api/get_categorias_controllers'
+import { get_posts } from '../../api/get_posts_controllers'
 import { get_post_metas } from '../../api/get_post_metas_controllers'
 import { get_tipos_post } from '../../api/get_tipos_post_controllers'
 import { AppActions, State } from '../../interfaces/interfaces'

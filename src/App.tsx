@@ -7,8 +7,6 @@ import Header from './components/Header';
 import Navigation from './components/Navigation';
 import NewPost from './components/new_post';
 import Posts from './pages/posts';
-import Paginas from './pages/paginas';
-import Accesorios from './pages/accesorios';
 import UpdatePost from './components/update_post';
 
 const Home = ()=>{
@@ -26,11 +24,9 @@ function App() {
         <Switch>
           <Route exact path="/" component={Home} />
           <Route path="/cpanel" component={Cpanel} />
-          <Route path="/post" component={Posts} />
-          <Route path="/new_post" component={NewPost} />
-          <Route path="/update_post/:id" component={UpdatePost} />
-          <Route path="/pagina" component={Paginas} />
-          <Route path="/accesorio" component={Accesorios} />
+          <Route path="/posttype/:type" component={Posts} />
+          <Route path="/new_post/:type" component={NewPost} />
+          <Route path="/update_post/:url" component={UpdatePost} />
         </Switch>
         </main>
       </div>

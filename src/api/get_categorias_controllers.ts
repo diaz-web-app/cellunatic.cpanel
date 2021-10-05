@@ -11,11 +11,12 @@ type DeleteCatParams={
 
 type TCreateParams={
     titulo:string
+    tipo_post:string
 }
-export const create_categoria=async({titulo}:TCreateParams)=>{
+export const create_categoria=async({titulo,tipo_post}:TCreateParams)=>{
     const request = await fetch(`${process.env.REACT_APP_API}/categorias`,{
         method:'post',
-        body:JSON.stringify({titulo}),
+        body:JSON.stringify({titulo,tipo_post}),
         headers:{
             "content-type":"application/json"
         }

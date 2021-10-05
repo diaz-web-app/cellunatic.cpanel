@@ -8,7 +8,7 @@ type Props={
     btn_text:string
 }
 export const NewCategoria=({titulo,btn_text}:Props)=>{
-    const {app_dispatch} = useContext(GlobalAppContext)
+    const {app_dispatch,app} = useContext(GlobalAppContext)
     const [show,setShow] = useState<boolean>(false)
     const prepare_posts=async()=>{
         const categorias = await get_categorias({})
@@ -21,9 +21,9 @@ export const NewCategoria=({titulo,btn_text}:Props)=>{
     }
     const create_category_handler=async(e:any)=>{
         e.preventDefault()
-        const {categoria} = e.target
-        if(categoria && categoria.value !==''){
-            await create_categoria({titulo:categoria.value})
+        const {titulo,tipo_post} = e.target
+        if(titulo && titulo.value !=='' && tipo_post && tipo_post.value !==''){
+            await create_categoria({titulo:titulo.value,tipo_post:tipo_post.value})
             await prepare_posts()
         }
         return
@@ -37,8 +37,24 @@ export const NewCategoria=({titulo,btn_text}:Props)=>{
             <form onSubmit={create_category_handler} className="new_categoria">
                 <div>
                     <label>Titulo</label>
-                    <input type="text" name="categoria" required/>
+                    <input type="text" name="titulo" required/>
                 </div>
+                
+                <div>
+                    <label>Tipo de post?</label>
+                    <input list="hijo" type="text" name="tipo_post" required/>
+
+                    <datalist id="hijo">
+                        {
+                            app.tipos_state && app.tipos_state.length > 0?(
+                                app.tipos_state.map((tipo)=>(
+                                    <option key={tipo._id} value={tipo.url}>tipo existente: {tipo.titulo}</option>
+                                ))
+                            ):null
+                        }
+                    </datalist>
+                </div>
+                
                 <div>
                     <button>Crear</button>
                 </div>

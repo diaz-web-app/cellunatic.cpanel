@@ -1,8 +1,8 @@
 import { ChangeEvent, FormEvent, useCallback, useContext, useEffect, useState } from "react"
-import { useParams } from "react-router"
+import { useHistory, useParams } from "react-router"
 import { get_post } from "../api/get_posts_controllers"
 import GlobalAppContext from "../context/app/app_state"
-import { TCategoria, TGetMediaFiles, TGetPost, TMeta, TTipoPost } from "../interfaces/interfaces"
+import { TCategoria, TGetMediaFiles, TGetPost, TMeta } from "../interfaces/interfaces"
 
 type UpdateParams={
     post:any
@@ -39,62 +39,50 @@ const http_delete_post=async({_id}:DeleteParams)=>{
 
 const addMeta=(e:FormEvent)=>{
     e.preventDefault()
-    const div_parent = document.getElementById('inputs_metas')
-    const new_div = document.createElement('div')
+    const div_hijo = document.getElementById('inputs_metas')
+    const div_container = document.createElement('div')
     const input_clave = document.createElement('input')
-    const input_contenido = document.createElement('input')
+    const input_valor = document.createElement('input')
+    const input_vista = document.createElement('input')
     const span = document.createElement('span')
-    const span_2 = document.createElement('span')
 
     const label_1 = document.createElement('label')
-    const label_2 = document.createElement('label_2')
+    const label_2 = document.createElement('label')
+    const label_3 = document.createElement('label')
 
     label_1.textContent='Clave'
-    label_2.textContent='Contenido'
-    span_2.textContent=''
+    label_2.textContent='Valor'
+    label_3.textContent='visible'
+    
 
 
     input_clave.name = 'clave'
     input_clave.placeholder = 'Clave'
-    input_contenido.name = 'contenido'
-    input_contenido.placeholder = 'contenido'
+    input_valor.name = 'valor'
+    input_valor.placeholder = 'valor'
+    input_vista.name = 'vista'
     span.onclick = delete_meta
     span.textContent = '-'
 
-    input_clave.style.background='var(--primary-color)'
-    input_clave.style.width='95%'
-    input_clave.style.borderRadius='5px'
-    input_clave.style.border='2px solid var(--secondary-color)'
-    input_clave.style.padding='5px 10px'
-    input_clave.style.margin='5px 0px'
+    input_clave.type = 'text'
+    input_valor.type = 'text'
+    input_vista.type = 'checkbox'
+    input_vista.checked = false
 
-    input_contenido.style.background='var(--primary-color)'
-    input_contenido.style.width='95%'
-    input_contenido.style.borderRadius='5px'
-    input_contenido.style.border='2px solid var(--secondary-color)'
-    input_contenido.style.padding='5px 10px'
-    input_contenido.style.margin='5px 0px'
+    div_container.style.display='grid'
+    div_container.classList.add('meta_div')
 
-    span.style.width='20px'
-    span.style.height='20px'
-    span.style.cursor='pointer'
-    span.style.border='2px solid darkorange'
-    span.style.textAlign='center'
-    span.style.lineHeight='1'
-    span.style.borderRadius='50%'
+    if(div_hijo){
+        
+        div_container.appendChild(label_1)
+        div_container.appendChild(input_clave)
+        div_container.appendChild(label_2)
+        div_container.appendChild(input_valor)
+        div_container.appendChild(label_3)
+        div_container.appendChild(input_vista)
+        div_container.appendChild(span)
 
-    new_div.style.display='grid'
-    new_div.style.gridTemplateColumns = '1fr 1fr 50px'
-
-    if(div_parent){
-        new_div.appendChild(label_1)
-        new_div.appendChild(label_2)
-        new_div.appendChild(span_2)
-        new_div.appendChild(input_clave)
-        new_div.appendChild(input_contenido)
-        new_div.appendChild(span)
-
-        div_parent.appendChild(new_div)
+        div_hijo.appendChild(div_container)
     }
     
 }
@@ -103,15 +91,15 @@ const delete_meta = (e:any)=>{
 }
 const prepare_post=(e:any)=>{
     e.preventDefault()
-    const {meta_desc,titulo,keywords,cover}:any = e.target 
+    const {meta_desc,titulo,meta_keywords,cover}:any = e.target 
     
     //Seleccionamos los matas
     const post_metas:any[] = []
     let div_metas = e.target.querySelector('#inputs_metas').querySelectorAll('div')
     for(let div of div_metas){
         const clave = div.querySelector('input[name=clave]')
-        const contenido = div.querySelector('input[name=contenido]')
-        post_metas.push({clave:clave.value,contenido:contenido.value})
+        const meta_description = div.querySelector('input[name=meta_description]')
+        post_metas.push({clave:clave.value,meta_description:meta_description.value})
     }
     //Seleccionamos las categorias
     const categoria:any[] = []
@@ -124,8 +112,8 @@ const prepare_post=(e:any)=>{
     const post={
         categoria,
         titulo:titulo.value,
-        contenido:meta_desc.value,
-        keywords:keywords.value,
+        meta_description:meta_desc.value,
+        meta_keywords:meta_keywords.value,
         cover:cover?.value
     }
     return {post,post_metas}
@@ -168,15 +156,16 @@ const UpdatePost = () => {
     const {app} = useContext(GlobalAppContext)
     const [data,setData] = useState<TGetPost>()
     const [covers,setCovers] = useState<TGetMediaFiles[]>(data?data.covers:[])
+    const {goBack} = useHistory()
     const params = useParams<any>()
 
     const set_post = useCallback( async()=>{
        
-        const response = await get_post({url:params.id})
+        const response = await get_post({url:params.url})
         setData(response)
         setCovers(response.covers)
     
-    },[params.id])
+    },[params.url])
 
     const update_post_handler=async(e:any)=>{
         e.preventDefault()
@@ -188,11 +177,13 @@ const UpdatePost = () => {
         const res = await http_update_post({_id:data.post._id,post,post_metas,covers})
         if(!res) return alert('error')
         alert('ok')
+        goBack()
     }
     const delete_post= async ()=>{
         if(!data || !data.post) return
         const deleted = await http_delete_post({_id:data.post._id})
-        if(deleted) return alert('post eliminado')
+        if(deleted) alert('post eliminado')
+        goBack()
     }
     const upload_cover_handler=async(e:ChangeEvent<HTMLInputElement>)=>{
         if(e.target.files && e.target.parentElement){
@@ -218,7 +209,7 @@ const UpdatePost = () => {
     },[set_post])
     return (
         <section>
-            <form onSubmit={(e:any)=>update_post_handler(e)} >
+            <form className="form_manage_posts" onSubmit={(e:any)=>update_post_handler(e)} >
                 {/** titulo y Tipo de post */}
                 <div>
                     {/** titulo requerido*/}
@@ -240,7 +231,7 @@ const UpdatePost = () => {
                     <ul style={{display:'flex',flexFlow:'row wrap'}} >
                     {
                         covers.length > 0?(
-                            covers.map(cover=>(<li style={{position:'relative',listStyle:'none',margin:'5px',width:'100px',height:'100px'}} key={cover._id} ><span onClick={()=>delete_cover_handler(cover.path)}  style={{position:'absolute',right:0,top:0,fontWeight:'bold',cursor:'pointer'}} >X</span><img style={{objectFit:'contain',width:'100%',height:'100%'}} src={process.env.REACT_APP_API+cover.url} alt={cover.filename} /></li>))
+                            covers.map(cover=>(<li style={{position:'relative',listStyle:'none',margin:'5px',width:'100px',height:'100px'}} key={cover._id} ><span onClick={()=>delete_cover_handler(cover.path)}  style={{position:'absolute',right:0,top:0,fontWeight:'bold',cursor:'pointer'}} >X</span><img style={{objectFit:'contain',width:'100%',height:'100%'}} src={cover.url} alt={cover.filename} /></li>))
                         ):null
                     }
                     </ul>
@@ -250,12 +241,12 @@ const UpdatePost = () => {
                     {/** Meta content */}
                     <div>
                         <label>Meta decription</label>
-                        <input type="text" name="meta_desc" required placeholder="meta description" defaultValue={data?.post?.contenido} />
+                        <input type="text" name="meta_desc" required placeholder="meta description" defaultValue={data?.post?.meta_description} />
                     </div>
-                    {/** Meta keywords*/}
+                    {/** Meta meta_keywords*/}
                     <div>
-                        <label>Meta keywords</label>
-                        <input type="text" name="keywords" required placeholder="cellunatic,forros,items..." defaultValue={data?.post?.keywords}/>
+                        <label>Meta meta_keywords</label>
+                        <input type="text" name="meta_keywords" required placeholder="cellunatic,forros,items..." defaultValue={data?.post?.meta_keywords}/>
                     </div>
                 </div>
 
@@ -266,15 +257,21 @@ const UpdatePost = () => {
                         <label> Meta info del post <button onClick={addMeta}>+</button></label>
                         {
                             data && data.metas.length > 0?(
-                                data?.metas.map((meta:TMeta)=>(
-                                    <div key={meta._id}>
-                                        <label>Clave</label><label>Contenido</label><span></span>
-                                        <input name="clave" placeholder="Clave" defaultValue={meta.clave}/>
-                                        
-                                        <input name="contenido" placeholder="contenido" defaultValue={meta.contenido} />
-                                        <span onClick={delete_meta} >-</span>
-                                    </div>
-                                ))
+                                data?.metas.map((meta:TMeta)=>{
+                                    return (
+                                        <div key={meta._id} className="meta_div" style={{display:'grid'}}>
+                                            <label>Clave</label>
+                                            <input name="clave" placeholder="Clave" defaultValue={meta.clave}/>
+
+                                            <label>valor</label>
+                                            <input name="valor" placeholder="valor" defaultValue={meta.valor} />
+
+                                            <label>visible</label>
+                                            <input type="checkbox" name="vista" defaultChecked={meta.vista} />
+                                            <span onClick={delete_meta} >-</span>
+                                        </div>
+                                    )
+                                })
                             ):null
                         }
                                           
@@ -303,51 +300,6 @@ const UpdatePost = () => {
                     <button>Actualizar post</button> <span onClick={delete_post} >Delete</span>
                 </div>
             </form>
-            <style>
-                {
-                    `
-                    form > div{
-                        display:grid;
-                        grid-template-columns:1fr;
-                        gap:20px;
-                    }
-                    
-                    input,select{
-                        width:95%;
-                        border-radius:6px;
-                        border:2px solid var(--secondary-color);
-                        margin:5px 0;
-                    }
-                    
-                    #inputs_categorias > div{
-                        display:flex;
-                        flex-flow:rows wrap;
-                        align-items:flex-start;
-                        align-content:flex-start;
-                    }
-                    form .cover_preview{
-                        width:100%;
-                        height:90%;
-                    }
-                    form .cover_preview img{
-                        width:100%;
-                        height:100%;
-                        object-fit:contain;
-                    }
-                    #inputs_categorias span,#inputs_categorias span input{
-                        margin:2px;
-                    }
-                    @media(min-width:960px){
-                        form > div{
-                            grid-template-columns:repeat(2,1fr);
-                        }
-                        form .cover_preview ul{
-                            grid-column:1 / span 2;
-                        }
-                    }
-                    `
-                }
-            </style>
         </section>
     )
 }

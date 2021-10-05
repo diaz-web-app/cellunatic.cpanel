@@ -1,7 +1,8 @@
-import { ChangeEvent, FormEvent, useContext, useEffect, useState } from "react"
-import { Link, useHistory } from "react-router-dom"
+import { ChangeEvent, FormEvent, useContext, useState } from "react"
+import { useHistory } from "react-router-dom"
+import {useParams} from 'react-router'
 import GlobalAppContext from "../context/app/app_state"
-import { TCategoria, TGetMediaFiles, TMediaFile, TTipoPost } from "../interfaces/interfaces"
+import { TCategoria, TGetMediaFiles, TMediaFile} from "../interfaces/interfaces"
 
 type CreateParams={
     post:any
@@ -55,92 +56,90 @@ const delete_cover = async({path}:TDeleteProps)=>{
 }
 const addMeta=(e:FormEvent)=>{
     e.preventDefault()
-    const div_parent = document.getElementById('inputs_metas')
-    const new_div = document.createElement('div')
+    const div_hijo = document.getElementById('inputs_metas')
+    const div_container = document.createElement('div')
     const input_clave = document.createElement('input')
-    const input_contenido = document.createElement('input')
+    const input_valor = document.createElement('input')
+    const input_vista = document.createElement('input')
     const span = document.createElement('span')
-    const span_2 = document.createElement('span')
 
     const label_1 = document.createElement('label')
     const label_2 = document.createElement('label')
+    const label_3 = document.createElement('label')
 
     label_1.textContent='Clave'
     label_2.textContent='Valor'
-    span_2.textContent=''
+    label_3.textContent='visible'
+    
 
 
     input_clave.name = 'clave'
     input_clave.placeholder = 'Clave'
-    input_contenido.name = 'valor'
-    input_contenido.placeholder = 'valor'
+    input_valor.name = 'valor'
+    input_valor.placeholder = 'valor'
+    input_vista.name = 'vista'
     span.onclick = delete_meta
     span.textContent = '-'
 
-    input_clave.style.background='var(--primary-color)'
-    input_clave.style.width='95%'
-    input_clave.style.borderRadius='5px'
-    input_clave.style.border='2px solid var(--secondary-color)'
-    input_clave.style.padding='5px 10px'
-    input_clave.style.margin='5px 0px'
 
-    input_contenido.style.background='var(--primary-color)'
-    input_contenido.style.width='95%'
-    input_contenido.style.borderRadius='5px'
-    input_contenido.style.border='2px solid var(--secondary-color)'
-    input_contenido.style.padding='5px 10px'
-    input_contenido.style.margin='5px 0px'
+    input_clave.type = 'text'
+    input_valor.type = 'text'
+    input_vista.type = 'checkbox'
+    input_vista.checked = false
 
-    span.style.width='20px'
-    span.style.height='20px'
-    span.style.cursor='pointer'
-    span.style.border='2px solid darkorange'
-    span.style.textAlign='center'
-    span.style.lineHeight='1'
-    span.style.borderRadius='50%'
 
-    new_div.style.display='grid'
-    new_div.style.gridTemplateColumns = '1fr 1fr 50px'
+    div_container.style.display='grid'
+    div_container.classList.add('meta_div')
 
-    if(div_parent){
-        new_div.appendChild(label_1)
-        new_div.appendChild(label_2)
-        new_div.appendChild(span_2)
-        new_div.appendChild(input_clave)
-        new_div.appendChild(input_contenido)
-        new_div.appendChild(span)
+    if(div_hijo){
+        
+        div_container.appendChild(label_1)
+        div_container.appendChild(input_clave)
+        div_container.appendChild(label_2)
+        div_container.appendChild(input_valor)
+        div_container.appendChild(label_3)
+        div_container.appendChild(input_vista)
+        div_container.appendChild(span)
 
-        div_parent.appendChild(new_div)
+        div_hijo.appendChild(div_container)
     }
     
 }
 const delete_meta = (e:any)=>{
     e.target.parentElement.remove()
 }
-const prepare_post=(e:any)=>{
+type Prepare_post={
+    e:any
+    tipo:string
+}
+const prepare_post=({e,tipo}:Prepare_post)=>{
     const inputs:HTMLInputElement[] = e.target.querySelectorAll('input') 
-    const tipo = e.target.querySelector('select[name=tipo]') 
     const post:any={}
+    post['tipo'] = tipo
     for(let input of inputs){
-        if(input.name!=='categoria' && input.name !== 'clave' && input.name !== 'contenido' && input.value===''){
+        if(input.name!=='categoria' && input.name !== 'clave' && input.name !== 'valor' && input.name !== 'vista' && input.value===''){
             alert('debe rellenar, '+input.name)
             return {post:null,post_metas:null}
         }
-        if(input.name!=='categoria' && input.name!=='file'){
+        if(input.name!=='categoria' && input.name!=='file' && input.name !== 'clave' && input.name !== 'valor' && input.name !== 'vista'){
             if(input.name === 'meta_desc'){
-                post['contenido'] = input.value
+                post['meta_description'] = input.value
+            }
+            if(input.name === 'meta_keywords'){
+                post['meta_keywords'] = input.value
             }
             post[input.name] = input.value
         }
     }
-    post['tipo'] = tipo?tipo.value:'post'
+    
     //Seleccionamos los matas
     const post_metas:any[] = []
     let div_metas = e.target.querySelector('#inputs_metas').querySelectorAll('div')
     for(let div of div_metas){
         const clave = div.querySelector('input[name=clave]')
         const valor = div.querySelector('input[name=valor]')
-        post_metas.push({clave:clave.value,contenido:valor.value})
+        const vista = div.querySelector('input[name=vista]')
+        post_metas.push({clave:clave.value,valor:valor.value,vista:vista.checked})
     }
     //Seleccionamos las categorias
     const post_categorias:any[] = []
@@ -152,15 +151,17 @@ const prepare_post=(e:any)=>{
     }
     return {post,post_metas,post_categorias}
 }
+
 const NewPost = () => {
     const {goBack} = useHistory()
     const {app} = useContext(GlobalAppContext)
     const [covers,setCovers] = useState<TGetMediaFiles[]>([])
+    const params = useParams<any>()
 
     const create_post_handler=async(e:any)=>{
         e.preventDefault()
         
-        const {post,post_metas,post_categorias}:any = prepare_post(e)
+        const {post,post_metas,post_categorias}:any = prepare_post({e,tipo:params.type})
         if(!post || !post_metas || !post_categorias) return
         
         const res = await http_create_post({post,post_metas,post_categorias,covers})
@@ -189,7 +190,7 @@ const NewPost = () => {
     
     return (
         <section>
-            <form onSubmit={create_post_handler} >
+            <form className="form_manage_posts" onSubmit={create_post_handler} >
                 {/**Cover */}
                 <div>
                     {/** titulo requerido*/}
@@ -212,25 +213,32 @@ const NewPost = () => {
                     <ul style={{display:'flex',flexFlow:'row wrap'}} >
                     {
                         covers.length > 0?(
-                            covers.map(cover=>(<li style={{position:'relative',listStyle:'none',margin:'5px',width:'100px',height:'100px'}} key={cover._id} ><span onClick={()=>delete_cover_handler(cover.path)}  style={{position:'absolute',right:0,top:0,fontWeight:'bold',cursor:'pointer'}} >X</span><img style={{objectFit:'contain',width:'100%',height:'100%'}} src={process.env.REACT_APP_API+cover.url} alt={cover.filename} /></li>))
+                            covers.map(cover=>(<li style={{position:'relative',listStyle:'none',margin:'5px',width:'100px',height:'100px'}} key={cover._id} ><span onClick={()=>delete_cover_handler(cover.path)}  style={{position:'absolute',right:0,top:0,fontWeight:'bold',cursor:'pointer'}} >X</span><img style={{objectFit:'contain',width:'100%',height:'100%'}} src={cover.url} alt={cover.filename} /></li>))
                         ):null
                     }
                     </ul>
                 </div>
 
                 {/** tipo de post requerido*/}
-                <div>
-                    <label>Tipo de post</label>
-                    <select name="tipo" required>
-                        {
-                            app.tipos_state && app.tipos_state.length > 0?(
-                                app.tipos_state.map((tipo:TTipoPost)=>(
-                                    <option key={tipo._id} value={tipo.url}>{tipo.titulo}</option>
-                                ))
-                            ):null
-                        }
-                    </select>
-                </div>
+                {
+                    params.type=='pagina'?(
+                        <div>
+                            <div>
+                                <label>Post hijo</label>
+                                <input list="hijo" type="text" name="padre" required/>
+                                <datalist id="hijo">
+                                    {
+                                        app.tipos_state && app.tipos_state.length > 0?(
+                                            app.tipos_state.map((tipo)=>(
+                                                <option key={tipo._id} value={tipo.url}>titulo: {tipo.titulo}</option>
+                                            ))
+                                        ):null
+                                    }
+                                </datalist>
+                            </div>
+                        </div>
+                    ):null
+                }
 
                 <div>
                     {/** Meta content */}
@@ -238,10 +246,10 @@ const NewPost = () => {
                         <label>Meta decription</label>
                         <input type="text" name="meta_desc" required placeholder="meta description" />
                     </div>
-                    {/** Meta keywords*/}
+                    {/** Meta meta_keywords*/}
                     <div>
-                        <label>Meta keywords</label>
-                        <input type="text" name="keywords" required placeholder="cellunatic,forros,items..." />
+                        <label>Meta meta_keywords</label>
+                        <input type="text" name="meta_keywords" required placeholder="cellunatic,forros,items..." />
                     </div>
                 </div>
                 <div>
@@ -250,79 +258,35 @@ const NewPost = () => {
                         <label> Meta info del post <button onClick={addMeta}>+</button>  </label>
                                           
                     </div>
-                </div>
-                
-                <div>
-                    <button>Crear post</button>
-                </div>
-
-                {/** categorias del post*/}
-                <div>
-                    
-                    {/** categorias del post*/}
                     <div id="inputs_categorias" >
                         <label>Categorias</label>
                         <div>
                             {
                                 app.categorias_state && app.categorias_state.length > 0?(
-                                    app.categorias_state.map((categoria:TCategoria)=>(
-                                        <span key={categoria._id} >
-                                            <label htmlFor={categoria._id}>{categoria.titulo}</label>
-                                            <input id={categoria._id} type="checkbox" name="categoria" value={categoria.url}/>
-                                        </span>
-                                    ))
+                                    app.categorias_state.map((categoria:TCategoria)=>{
+                                        return (
+                                            
+                                            categoria.tipo_post == params.type?(
+                                                <span key={categoria._id} >
+                                                    <label htmlFor={categoria._id}>{categoria.titulo}</label>
+                                                    <input id={categoria._id} type="checkbox" name="categoria" value={categoria.url}/>
+                                                </span>
+                                            ):null
+                                            
+                                        )
+                                    })
                                 ):null
                             }                    
                         </div>
                     </div>
-                </div>                
+                </div>
+                
+                <div>
+                    <button>Crear post</button>
+                </div>
+            
             </form>
-            <div>  <Link to="/cpanel" ><button>Volver</button></Link> </div>
-            <style>
-                {
-                    `
-                    form > div{
-                        display:grid;
-                        grid-template-columns:1fr;
-                        gap:20px;
-                    }
-                    
-                    input,select{
-                        width:95%;
-                        border-radius:6px;
-                        border:2px solid var(--secondary-color);
-                        margin:5px 0;
-                    }
-                    
-                    #inputs_categorias > div{
-                        display:flex;
-                        flex-flow:rows wrap;
-                        align-items:flex-start;
-                        align-content:flex-start;
-                    }
-                    form .cover_preview{
-                        width:100%;
-                        height:90%;
-                    }
-                    form .cover_preview img{
-                        width:100%;
-                        height:100%;
-                        object-fit:contain;
-                    }
-                    #inputs_categorias span,#inputs_categorias span input{
-                        margin:2px;
-                    }
-                    @media(min-width:960px){
-                        form > div{
-                            grid-template-columns:repeat(2,1fr);
-                        }
-                        form .cover_preview ul{
-                            grid-column:1 / span 2;
-                        }
-                    }
-                    `
-                }
-            </style>
+            <div> <button onClick={()=>goBack()} >Volver</button></div>
         </section>
     )
 }

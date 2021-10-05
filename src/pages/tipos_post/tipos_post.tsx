@@ -25,13 +25,13 @@ const prepare_post=(e:any)=>{
     const tipo = e.target.querySelector('select[name=tipo]') 
     const post:any={}
     for(let input of inputs){
-        if(input.name!=='categoria' && input.name !== 'clave' && input.name !== 'contenido' && input.value===''){
+        if(input.name!=='categoria' && input.name !== 'clave' && input.name !== 'meta_description' && input.value===''){
             alert('debe rellenar, '+input.name)
             return {post:null,post_metas:null}
         }
         if(input.name!=='categoria' && input.name!=='cover' && input.name!=='file'){
             if(input.name === 'meta_desc'){
-                post['contenido'] = input.value
+                post['meta_description'] = input.value
             }
             post[input.name] = input.value
         }
@@ -43,7 +43,7 @@ const prepare_post=(e:any)=>{
     for(let div of div_metas){
         const clave = div.querySelector('input[name=clave]')
         const valor = div.querySelector('input[name=valor]')
-        post_metas.push({clave:clave.value,contenido:valor.value})
+        post_metas.push({clave:clave.value,meta_description:valor.value})
     }
     //Seleccionamos las categorias
     const post_categorias:any[] = []

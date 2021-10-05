@@ -16,7 +16,7 @@ const Navigation = () => {
                             app.tipos_state.map((tipo:TTipoPost)=>{
                                 return(
                                     <li key={tipo._id}>
-                                        <Link to={"/"+tipo.url} ><a href={"/"+tipo.url}>{tipo.titulo}</a></Link>
+                                        <Link to={"/posttype/"+tipo.url} ><a href={"/posttype/"+tipo.url}>{tipo.titulo}</a></Link>
                                     </li>
                                 )
                             })

@@ -54,8 +54,13 @@ const Cpanel = () => {
                     `
                     .tipos_categorias{
                         display:grid;
-                        grid-template-columns:repeat(2,1fr);
+                        grid-template-columns:repeat(1,1fr);
                         gap:10px;
+                    }
+                    @media(min-width:680px){
+                        .tipos_categorias{
+                            grid-template-columns:repeat(2,1fr);
+                        }
                     }
                     `
                 }

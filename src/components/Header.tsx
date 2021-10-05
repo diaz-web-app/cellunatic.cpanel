@@ -19,7 +19,7 @@ const Header = () => {
                 <Link to="/" >
                     <a href="/" className="logo">
                         <img style={{ margin: '0 5px' }} src="/favicon.ico" alt="cellunatic logo" width="32px" height="32px" />
-                        <b>Cellunatic</b>
+                        <b>Cpanel</b>
                     </a>
                 </Link>
                 
