@@ -221,7 +221,7 @@ const NewPost = () => {
 
                 {/** tipo de post requerido*/}
                 {
-                    params.type=='pagina'?(
+                    params.type==='pagina'?(
                         <div>
                             <div>
                                 <label>Post hijo</label>
@@ -266,7 +266,7 @@ const NewPost = () => {
                                     app.categorias_state.map((categoria:TCategoria)=>{
                                         return (
                                             
-                                            categoria.tipo_post == params.type?(
+                                            categoria.tipo_post === params.type?(
                                                 <span key={categoria._id} >
                                                     <label htmlFor={categoria._id}>{categoria.titulo}</label>
                                                     <input id={categoria._id} type="checkbox" name="categoria" value={categoria.url}/>
